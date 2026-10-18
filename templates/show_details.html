@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}{{ show.title }}{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container form-wrap">
+    <div class="page-head">
+      <div>
+        <p class="eyebrow">Show #{{ show.show_id }}</p>
+        <h1>{{ show.title }}</h1>
+        <p>
+          <span class="badge badge-soft">{{ show.category }}</span>
+          <span class="badge badge-{{ show.status|lower }}">{{ show.status }}</span>
+        </p>
+      </div>
+      <div class="page-actions">
+        <a href="{{ url_for('public_shows') }}" class="btn btn-outline">Back to Schedule</a>
+        {% if is_owner %}
+          <a href="{{ url_for('edit_show', show_id=show.show_id) }}" class="btn btn-secondary">Edit Show</a>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if show.status == 'Rejected' and show.rejection_reason and (is_owner or is_admin) %}
+      <div class="alert alert-error">
+        <span><strong>Rejection reason:</strong> {{ show.rejection_reason }}</span>
+      </div>
+    {% endif %}
+
+    {% if show.status == 'Approved' and is_owner %}
+      <div class="alert alert-success">
+        <span>This show is live on the public schedule. Editing it will require administrator re-approval.</span>
+      </div>
+    {% endif %}
+
+    <div class="two-col">
+      <div class="card p-2">
+        <h2 class="card-title">Show Details</h2>
+        {% if show.poster_url %}
+          <img class="detail-poster" src="{{ show.poster_url }}" alt="{{ show.title }} poster"
+               onerror="this.remove()">
+        {% endif %}
+        <p class="detail-description">{{ show.description }}</p>
+
+        <dl class="detail-list">
+          <div><dt>Category</dt><dd>{{ show.category }}</dd></div>
+          <div><dt>Agency / production house</dt><dd>{{ show.agency_name }}</dd></div>
+          <div><dt>Presenter / host</dt><dd>{{ show.host_name }}</dd></div>
+          <div><dt>Channel / platform</dt><dd>{{ show.channel_name }}</dd></div>
+          <div><dt>Broadcast date</dt><dd>{{ show.broadcast_date|fmt_date }}</dd></div>
+          <div><dt>Start time</dt><dd>{{ show.start_time|fmt_time }}</dd></div>
+          <div><dt>End time</dt><dd>{{ show.end_time|fmt_time }}</dd></div>
+          <div><dt>Duration</dt><dd>{{ show.duration_minutes|fmt_duration }}</dd></div>
+          <div><dt>Language</dt><dd>{{ show.language }}</dd></div>
+          <div><dt>Target audience</dt><dd>{{ show.target_audience or 'Not specified' }}</dd></div>
+          <div><dt>Submitted at</dt><dd>{{ show.submitted_at|fmt_datetime }}</dd></div>
+          <div><dt>Last updated</dt><dd>{{ show.updated_at|fmt_datetime }}</dd></div>
+        </dl>
+
+        {% if show.additional_notes %}
+          <h3 class="card-subtitle">Additional notes</h3>
+          <p class="muted">{{ show.additional_notes }}</p>
+        {% endif %}
+      </div>
+
+      <div>
+        {% if is_admin %}
+          <div class="card p-2">
+            <h2 class="card-title">Submitting User</h2>
+            <dl class="detail-list">
+              <div><dt>Name</dt><dd>{{ owner.full_name }}</dd></div>
+              <div><dt>Agency</dt><dd>{{ owner.agency_name }}</dd></div>
+              <div><dt>Email</dt><dd>{{ owner.email }}</dd></div>
+              <div><dt>Phone</dt><dd>{{ owner.phone or 'Not provided' }}</dd></div>
+            </dl>
+            <a class="btn btn-outline btn-sm" href="{{ url_for('admin_user_detail', user_id=show.user_id) }}">Open user profile</a>
+          </div>
+
+          <div class="card p-2 mt-2">
+            <h2 class="card-title">Administrator Actions</h2>
+            {% if show.status != 'Approved' %}
+              <form method="post" action="{{ url_for('admin_approve_show', show_id=show.show_id) }}" class="mb-1">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-success btn-block">Approve Show</button>
+              </form>
+            {% endif %}
+            {% if show.status != 'Rejected' %}
+              <form method="post" action="{{ url_for('admin_reject_show', show_id=show.show_id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group">
+                  <label for="reason">Rejection reason</label>
+                  <textarea id="reason" name="reason" rows="3" required minlength="5" maxlength="500"
+                            placeholder="Explain why this show cannot be published"></textarea>
+                </div>
+                <button type="submit" class="btn btn-danger btn-block">Reject Show</button>
+              </form>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        {% if is_owner %}
+          <div class="card p-2 mt-2">
+            <h2 class="card-title">Owner Actions</h2>
+            <a href="{{ url_for('edit_show', show_id=show.show_id) }}" class="btn btn-secondary btn-block mb-1">Edit Show</a>
+            <form method="post" action="{{ url_for('delete_show', show_id=show.show_id) }}"
+                  onsubmit="return confirm('Delete this show? This cannot be undone.');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-danger btn-block">Delete Show</button>
+            </form>
+          </div>
+        {% endif %}
+
+        <div class="card p-2 mt-2">
+          <h2 class="card-title">Status History</h2>
+          {% if history %}
+            <ul class="history-list">
+              {% for item in history %}
+                <li>
+                  <span class="badge badge-{{ item.new_status|lower }}">{{ item.previous_status or 'New' }} &rarr; {{ item.new_status }}</span>
+                  <p class="muted">
+                    {{ item.changed_at|fmt_datetime }}
+                    {% if item.admin_name %} by {{ item.admin_name }}{% endif %}
+                    {% if item.remarks %}<br>Remark: {{ item.remarks }}{% endif %}
+                  </p>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="muted">No status changes recorded yet.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

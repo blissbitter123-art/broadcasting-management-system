@@ -1,0 +1,24 @@
+databases:
+  - name: broadcasting-management-db
+    databaseName: broadcasting_management
+    user: broadcasting_management_user
+    plan: free
+
+services:
+  - type: web
+    name: broadcasting-management
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python database.py schema && gunicorn app:app
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: broadcasting-management-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FLASK_DEBUG
+        value: "0"
+      - key: SESSION_COOKIE_SECURE
+        value: "true"

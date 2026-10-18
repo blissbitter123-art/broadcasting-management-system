@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}My Shows{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="page-head">
+      <div>
+        <h1>My Shows</h1>
+        <p class="muted">Every show submitted from your account. You can only see and manage your own submissions.</p>
+      </div>
+      <a href="{{ url_for('add_show') }}" class="btn btn-primary">+ List a New Show</a>
+    </div>
+
+    <form class="filter-bar card" method="get" action="{{ url_for('my_shows') }}">
+      <div class="filter-grid">
+        <div class="form-group">
+          <label for="q">Search by title</label>
+          <input type="text" id="q" name="q" value="{{ q }}" placeholder="Show title">
+        </div>
+        <div class="form-group">
+          <label for="status">Approval status</label>
+          <select id="status" name="status">
+            <option value="">All statuses</option>
+            {% for st in STATUSES %}
+              <option value="{{ st }}" {{ 'selected' if status == st }}>{{ st }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="sort">Sort by</label>
+          <select id="sort" name="sort">
+            <option value="date_asc" {{ 'selected' if sort == 'date_asc' }}>Broadcast time (soonest)</option>
+            <option value="date_desc" {{ 'selected' if sort == 'date_desc' }}>Broadcast time (latest)</option>
+            <option value="title" {{ 'selected' if sort == 'title' }}>Title (A-Z)</option>
+            <option value="submitted" {{ 'selected' if sort == 'submitted' }}>Recently submitted</option>
+          </select>
+        </div>
+        <div class="form-group filter-actions">
+          <button type="submit" class="btn btn-primary">Apply</button>
+          <a class="btn btn-outline" href="{{ url_for('my_shows') }}">Reset</a>
+        </div>
+      </div>
+    </form>
+
+    {% if shows %}
+      <div class="table-wrap card mt-2">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Show ID</th>
+              <th>Title</th>
+              <th>Category</th>
+              <th>Channel</th>
+              <th>Date</th>
+              <th>Start</th>
+              <th>End</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for show in shows %}
+              <tr>
+                <td>#{{ show.show_id }}</td>
+                <td>
+                  <strong>{{ show.title }}</strong>
+                  {% if show.status == 'Rejected' and show.rejection_reason %}
+                    <p class="table-sub table-sub-danger">Reason: {{ show.rejection_reason }}</p>
+                  {% elif show.status == 'Approved' %}
+                    <p class="table-sub">Editing will send it back for re-approval.</p>
+                  {% endif %}
+                </td>
+                <td><span class="badge badge-soft">{{ show.category }}</span></td>
+                <td>{{ show.channel_name }}</td>
+                <td>{{ show.broadcast_date|fmt_date }}</td>
+                <td>{{ show.start_time|fmt_time }}</td>
+                <td>{{ show.end_time|fmt_time }}</td>
+                <td><span class="badge badge-{{ show.status|lower }}">{{ show.status }}</span></td>
+                <td class="actions-cell">
+                  <a class="btn btn-outline btn-sm" href="{{ url_for('show_details', show_id=show.show_id) }}">View</a>
+                  <a class="btn btn-secondary btn-sm" href="{{ url_for('edit_show', show_id=show.show_id) }}">Edit</a>
+                  <form method="post" action="{{ url_for('delete_show', show_id=show.show_id) }}"
+                        onsubmit="return confirm('Delete this show? This cannot be undone.');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state card mt-2">
+        <h3>No shows found</h3>
+        <p>You have not listed any shows yet, or no shows match the selected filters.</p>
+        <a href="{{ url_for('add_show') }}" class="btn btn-primary">List Your First Show</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

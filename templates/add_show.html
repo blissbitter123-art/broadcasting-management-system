@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}List a Show{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container form-wrap">
+    <div class="page-head">
+      <div>
+        <h1>List a New Show</h1>
+        <p class="muted">All submissions are reviewed by an administrator before appearing on the public schedule.</p>
+      </div>
+      <a href="{{ url_for('my_shows') }}" class="btn btn-outline">Back to My Shows</a>
+    </div>
+
+    <form method="post" action="{{ url_for('add_show') }}" id="showForm" class="card p-2" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <h3 class="form-section-title">Show Information</h3>
+      <div class="form-group">
+        <label for="title">Show title *</label>
+        <input type="text" id="title" name="title" maxlength="200" required
+               value="{{ show.get('title','') or '' }}" placeholder="e.g. Sunrise News Hour"
+               class="{{ 'is-invalid' if errors.get('title') }}">
+        {% if errors.get('title') %}<p class="field-error">{{ errors.title }}</p>{% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description *</label>
+        <textarea id="description" name="description" rows="4" maxlength="2000" required
+                  placeholder="What is this show about?"
+                  class="{{ 'is-invalid' if errors.get('description') }}">{{ show.get('description','') or '' }}</textarea>
+        {% if errors.get('description') %}<p class="field-error">{{ errors.description }}</p>{% endif %}
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="category">Category / genre *</label>
+          <select id="category" name="category" required class="{{ 'is-invalid' if errors.get('category') }}">
+            <option value="">Select a category</option>
+            {% for cat in CATEGORIES %}
+              <option value="{{ cat }}" {{ 'selected' if show.get('category') == cat }}>{{ cat }}</option>
+            {% endfor %}
+          </select>
+          {% if errors.get('category') %}<p class="field-error">{{ errors.category }}</p>{% endif %}
+        </div>
+        <div class="form-group">
+          <label for="language">Language *</label>
+          <select id="language" name="language" required class="{{ 'is-invalid' if errors.get('language') }}">
+            <option value="">Select a language</option>
+            {% for lang in LANGUAGES %}
+              <option value="{{ lang }}" {{ 'selected' if show.get('language') == lang }}>{{ lang }}</option>
+            {% endfor %}
+          </select>
+          {% if errors.get('language') %}<p class="field-error">{{ errors.language }}</p>{% endif %}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="agency_name">Agency / production house *</label>
+          <input type="text" id="agency_name" name="agency_name" maxlength="120" required
+                 value="{{ show.get('agency_name','') or '' }}"
+                 class="{{ 'is-invalid' if errors.get('agency_name') }}">
+          {% if errors.get('agency_name') %}<p class="field-error">{{ errors.agency_name }}</p>{% endif %}
+        </div>
+        <div class="form-group">
+          <label for="host_name">Presenter / host name *</label>
+          <input type="text" id="host_name" name="host_name" maxlength="120" required
+                 value="{{ show.get('host_name','') or '' }}"
+                 class="{{ 'is-invalid' if errors.get('host_name') }}">
+          {% if errors.get('host_name') %}<p class="field-error">{{ errors.host_name }}</p>{% endif %}
+        </div>
+      </div>
+
+      <h3 class="form-section-title">Broadcast Schedule</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="channel_name">Broadcast channel / platform *</label>
+          <input type="text" id="channel_name" name="channel_name" maxlength="120" required
+                 value="{{ show.get('channel_name','') or '' }}" placeholder="e.g. DD National"
+                 class="{{ 'is-invalid' if errors.get('channel_name') }}">
+          {% if errors.get('channel_name') %}<p class="field-error">{{ errors.channel_name }}</p>{% endif %}
+        </div>
+        <div class="form-group">
+          <label for="broadcast_date">Broadcast date *</label>
+          <input type="date" id="broadcast_date" name="broadcast_date" required
+                 value="{{ show.get('broadcast_date','') or '' }}"
+                 class="{{ 'is-invalid' if errors.get('broadcast_date') }}">
+          {% if errors.get('broadcast_date') %}<p class="field-error">{{ errors.broadcast_date }}</p>{% endif %}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="start_time">Start time *</label>
+          <input type="time" id="start_time" name="start_time" required
+                 value="{{ show.get('start_time','') or '' }}"
+                 class="{{ 'is-invalid' if errors.get('start_time') }}">
+          {% if errors.get('start_time') %}<p class="field-error">{{ errors.start_time }}</p>{% endif %}
+        </div>
+        <div class="form-group">
+          <label for="end_time">End time *</label>
+          <input type="time" id="end_time" name="end_time" required
+                 value="{{ show.get('end_time','') or '' }}"
+                 class="{{ 'is-invalid' if errors.get('end_time') }}">
+          {% if errors.get('end_time') %}<p class="field-error">{{ errors.end_time }}</p>{% endif %}
+        </div>
+      </div>
+
+      <div class="duration-box" id="durationBox">
+        Calculated duration: <strong id="durationValue">{% if duration %}{{ duration|fmt_duration }}{% else %}--:--{% endif %}</strong>
+        <p class="field-hint">Duration is calculated automatically from the start and end times. Shows must start and end on the same day.</p>
+      </div>
+
+      <h3 class="form-section-title">Optional Details</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="target_audience">Target audience</label>
+          <input type="text" id="target_audience" name="target_audience" maxlength="120"
+                 value="{{ show.get('target_audience','') or '' }}" placeholder="e.g. Family audience, 18-35">
+        </div>
+        <div class="form-group">
+          <label for="poster_url">Poster image URL</label>
+          <input type="url" id="poster_url" name="poster_url" maxlength="500"
+                 value="{{ show.get('poster_url','') or '' }}" placeholder="https://example.com/poster.jpg"
+                 class="{{ 'is-invalid' if errors.get('poster_url') }}">
+          {% if errors.get('poster_url') %}<p class="field-error">{{ errors.poster_url }}</p>{% endif %}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="additional_notes">Additional notes</label>
+        <textarea id="additional_notes" name="additional_notes" rows="3" maxlength="2000"
+                  placeholder="Anything the administrator should know">{{ show.get('additional_notes','') or '' }}</textarea>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn-lg">Submit for Approval</button>
+        <a href="{{ url_for('my_shows') }}" class="btn btn-outline btn-lg">Cancel</a>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

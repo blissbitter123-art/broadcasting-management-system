@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Admin Login{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container auth-wrap">
+    <div class="card auth-card">
+      <div class="auth-head">
+        <span class="badge badge-admin">Administrator Portal</span>
+        <h1>Admin Login</h1>
+        <p class="muted">Restricted access. Only provisioned administrator accounts can sign in here.</p>
+      </div>
+
+      {% if errors.get('form') %}
+        <div class="alert alert-error"><span>{{ errors.form }}</span></div>
+      {% endif %}
+
+      <form method="post" action="{{ url_for('admin_login') }}" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-group">
+          <label for="email">Admin email</label>
+          <input type="email" id="email" name="email" value="{{ form.get('email','') }}"
+                 placeholder="admin@example.com" required maxlength="120"
+                 class="{{ 'is-invalid' if errors.get('email') }}">
+          {% if errors.get('email') %}<p class="field-error">{{ errors.email }}</p>{% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required
+                 class="{{ 'is-invalid' if errors.get('password') }}">
+          {% if errors.get('password') %}<p class="field-error">{{ errors.password }}</p>{% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Sign in to Admin Portal</button>
+      </form>
+
+      <p class="auth-alt">Regular user? <a href="{{ url_for('login') }}">Use the user login</a></p>
+    </div>
+  </div>
+</section>
+{% endblock %}

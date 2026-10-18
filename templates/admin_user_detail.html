@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}User {{ profile.full_name }}{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="page-head">
+      <div>
+        <h1>{{ profile.full_name }}</h1>
+        <p class="muted">
+          <span class="badge {{ 'badge-admin' if profile.role == 'admin' else 'badge-soft' }}">{{ profile.role }}</span>
+          <span class="badge {{ 'badge-approved' if profile.is_active else 'badge-rejected' }}">
+            {{ 'Active' if profile.is_active else 'Deactivated' }}
+          </span>
+        </p>
+      </div>
+      <a href="{{ url_for('admin_users') }}" class="btn btn-outline">Back to Users</a>
+    </div>
+
+    <div class="two-col">
+      <div class="card p-2">
+        <h2 class="card-title">Account Information</h2>
+        <dl class="detail-list">
+          <div><dt>User ID</dt><dd>#{{ profile.user_id }}</dd></div>
+          <div><dt>Full name</dt><dd>{{ profile.full_name }}</dd></div>
+          <div><dt>Agency</dt><dd>{{ profile.agency_name }}</dd></div>
+          <div><dt>Email</dt><dd>{{ profile.email }}</dd></div>
+          <div><dt>Phone</dt><dd>{{ profile.phone or 'Not provided' }}</dd></div>
+          <div><dt>Joined</dt><dd>{{ profile.created_at|fmt_datetime }}</dd></div>
+        </dl>
+        {% if profile.user_id != g.user.user_id %}
+          <form method="post" action="{{ url_for('admin_toggle_user', user_id=profile.user_id) }}"
+                onsubmit="return confirm('{{ 'Deactivate' if profile.is_active else 'Activate' }} this account?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn {{ 'btn-danger' if profile.is_active else 'btn-success' }}">
+              {{ 'Deactivate Account' if profile.is_active else 'Activate Account' }}
+            </button>
+          </form>
+        {% endif %}
+      </div>
+
+      <div class="card p-2">
+        <h2 class="card-title">Shows Submitted ({{ shows|length }})</h2>
+        {% if shows %}
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>ID</th><th>Title</th><th>Channel</th><th>Date</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                {% for show in shows %}
+                  <tr>
+                    <td>#{{ show.show_id }}</td>
+                    <td>{{ show.title }}</td>
+                    <td>{{ show.channel_name }}</td>
+                    <td>{{ show.broadcast_date|fmt_date }}</td>
+                    <td><span class="badge badge-{{ show.status|lower }}">{{ show.status }}</span></td>
+                    <td>
+                      <a class="btn btn-outline btn-sm" href="{{ url_for('show_details', show_id=show.show_id) }}">View</a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="muted">This user has not submitted any shows yet.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

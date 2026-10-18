@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Home - CBMS{% endblock %}
+
+{% block content %}
+<h1>Channel Broadcasting Management System</h1>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>{{ stats.total_shows }}</h3>
+        <p>Total Shows</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ stats.total_users }}</h3>
+        <p>Registered Users</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ stats.total_channels }}</h3>
+        <p>Channels</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ stats.total_schedules }}</h3>
+        <p>Scheduled Broadcasts</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ stats.cancelled }}</h3>
+        <p>Cancelled Broadcasts</p>
+    </div>
+</div>
+
+<section class="features">
+    <h2>Features</h2>
+    <ul>
+        <li>Manage broadcasting agencies and channels</li>
+        <li>Submit and track shows</li>
+        <li>Schedule broadcasts with conflict detection</li>
+        <li>Role-based access control</li>
+    </ul>
+</section>
+{% endblock %}

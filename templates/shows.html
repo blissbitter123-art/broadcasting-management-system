@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Available Shows{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <h2>Public Broadcast Schedule</h2>
+      <p>Browse every approved show. Pending and rejected submissions stay private.</p>
+    </div>
+
+    <form class="filter-bar card" method="get" action="{{ url_for('public_shows') }}">
+      <div class="filter-grid">
+        <div class="form-group">
+          <label for="q">Search by title</label>
+          <input type="text" id="q" name="q" value="{{ q }}" placeholder="e.g. Morning News">
+        </div>
+        <div class="form-group">
+          <label for="category">Category</label>
+          <select id="category" name="category">
+            <option value="">All categories</option>
+            {% for cat in CATEGORIES %}
+              <option value="{{ cat }}" {{ 'selected' if category == cat }}>{{ cat }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="channel">Channel</label>
+          <select id="channel" name="channel">
+            <option value="">All channels</option>
+            {% for ch in channels %}
+              <option value="{{ ch }}" {{ 'selected' if channel == ch }}>{{ ch }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="filter_date">Broadcast date</label>
+          <input type="date" id="filter_date" name="filter_date" value="{{ filter_date }}">
+        </div>
+        <div class="form-group">
+          <label for="sort">Sort by</label>
+          <select id="sort" name="sort">
+            <option value="date_asc" {{ 'selected' if sort == 'date_asc' }}>Broadcast time (soonest)</option>
+            <option value="date_desc" {{ 'selected' if sort == 'date_desc' }}>Broadcast time (latest)</option>
+            <option value="title" {{ 'selected' if sort == 'title' }}>Show title (A-Z)</option>
+          </select>
+        </div>
+        <div class="form-group filter-actions">
+          <button type="submit" class="btn btn-primary">Apply Filters</button>
+          <a class="btn btn-outline" href="{{ url_for('public_shows') }}">Reset</a>
+        </div>
+      </div>
+    </form>
+
+    {% if shows %}
+      <div class="table-wrap card mt-2">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Show</th>
+              <th>Agency</th>
+              <th>Channel</th>
+              <th>Category</th>
+              <th>Language</th>
+              <th>Broadcast Date</th>
+              <th>Time</th>
+              <th>Host</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for show in shows %}
+              <tr>
+                <td>
+                  <strong>{{ show.title }}</strong>
+                  <p class="table-sub">{{ show.description[:80] }}{% if show.description|length > 80 %}...{% endif %}</p>
+                </td>
+                <td>{{ show.agency_name }}</td>
+                <td>{{ show.channel_name }}</td>
+                <td><span class="badge badge-soft">{{ show.category }}</span></td>
+                <td>{{ show.language }}</td>
+                <td>{{ show.broadcast_date|fmt_date }}</td>
+                <td>{{ show.start_time|fmt_time }} - {{ show.end_time|fmt_time }}</td>
+                <td>{{ show.host_name }}</td>
+                <td>
+                  <a class="btn btn-outline btn-sm" href="{{ url_for('show_details', show_id=show.show_id) }}">Details</a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state card mt-2">
+        <h3>No shows match your filters</h3>
+        <p>Try a different search term, category, channel or date.</p>
+        <a class="btn btn-outline" href="{{ url_for('public_shows') }}">Clear filters</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="page-head">
+      <div>
+        <h1>Administrator Dashboard</h1>
+        <p class="muted">Signed in as {{ g.user.full_name }} &middot; Full platform overview</p>
+      </div>
+      <div class="page-actions">
+        <a href="{{ url_for('admin_shows') }}" class="btn btn-primary">Manage Shows</a>
+        <a href="{{ url_for('admin_users') }}" class="btn btn-outline">Manage Users</a>
+      </div>
+    </div>
+
+    {% if stats %}
+      <div class="stat-grid stat-grid-7">
+        <div class="card stat-card">
+          <span class="stat-label">Registered Users</span>
+          <strong class="stat-value">{{ stats.total_users }}</strong>
+        </div>
+        <div class="card stat-card">
+          <span class="stat-label">Agencies</span>
+          <strong class="stat-value">{{ stats.total_agencies }}</strong>
+        </div>
+        <div class="card stat-card">
+          <span class="stat-label">Total Shows</span>
+          <strong class="stat-value">{{ stats.total_shows }}</strong>
+        </div>
+        <div class="card stat-card stat-success">
+          <span class="stat-label">Approved</span>
+          <strong class="stat-value">{{ stats.approved }}</strong>
+        </div>
+        <div class="card stat-card stat-warning">
+          <span class="stat-label">Pending</span>
+          <strong class="stat-value">{{ stats.pending }}</strong>
+        </div>
+        <div class="card stat-card stat-danger">
+          <span class="stat-label">Rejected</span>
+          <strong class="stat-value">{{ stats.rejected }}</strong>
+        </div>
+        <div class="card stat-card stat-info">
+          <span class="stat-label">Upcoming Broadcasts</span>
+          <strong class="stat-value">{{ stats.upcoming }}</strong>
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="card mt-2">
+      <div class="card-head">
+        <h2>Recent Submissions</h2>
+        <a href="{{ url_for('admin_shows') }}" class="btn btn-outline btn-sm">View all shows</a>
+      </div>
+
+      {% if recent %}
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Show Title</th>
+                <th>Submitted By</th>
+                <th>Agency</th>
+                <th>Channel</th>
+                <th>Broadcast Date</th>
+                <th>Start Time</th>
+                <th>Submitted At</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for show in recent %}
+                <tr id="show-{{ show.show_id }}">
+                  <td>#{{ show.show_id }}</td>
+                  <td><strong>{{ show.title }}</strong></td>
+                  <td>{{ show.owner_name }}</td>
+                  <td>{{ show.agency_name }}</td>
+                  <td>{{ show.channel_name }}</td>
+                  <td>{{ show.broadcast_date|fmt_date }}</td>
+                  <td>{{ show.start_time|fmt_time }}</td>
+                  <td>{{ show.submitted_at|fmt_datetime }}</td>
+                  <td><span class="badge badge-{{ show.status|lower }}">{{ show.status }}</span></td>
+                  <td class="actions-cell">
+                    <a class="btn btn-outline btn-sm" href="{{ url_for('show_details', show_id=show.show_id) }}">View</a>
+                    {% if show.status != 'Approved' %}
+                      <form method="post" action="{{ url_for('admin_approve_show', show_id=show.show_id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                      </form>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="muted empty-inline">No shows have been submitted yet.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

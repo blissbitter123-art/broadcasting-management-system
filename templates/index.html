@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="container hero-inner">
+    <div class="hero-copy">
+      <p class="eyebrow">Channel Broadcasting Management System</p>
+      <h1>Manage Your Broadcast Schedule with Ease</h1>
+      <p class="lead">
+        BroadcastHub gives broadcasting agencies, production houses and individual presenters
+        one simple portal to list shows, publish broadcast schedules and keep every
+        listing organized - while administrators monitor and approve everything from a
+        single secure dashboard.
+      </p>
+      <div class="hero-actions">
+        {% if not g.user %}
+          <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">List Your Show</a>
+          <a href="{{ url_for('register') }}" class="btn btn-outline btn-lg">Create an Account</a>
+        {% elif g.user.role == 'admin' %}
+          <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary btn-lg">Open Admin Dashboard</a>
+          <a href="{{ url_for('public_shows') }}" class="btn btn-outline btn-lg">Public Schedule</a>
+        {% else %}
+          <a href="{{ url_for('add_show') }}" class="btn btn-primary btn-lg">List Your Show</a>
+          <a href="{{ url_for('my_shows') }}" class="btn btn-outline btn-lg">My Shows</a>
+        {% endif %}
+      </div>
+      <ul class="hero-stats">
+        <li><strong>{{ counters.users }}</strong><span>Registered Users</span></li>
+        <li><strong>{{ counters.approved }}</strong><span>Approved Shows</span></li>
+        <li><strong>{{ counters.channels }}</strong><span>Broadcast Channels</span></li>
+      </ul>
+    </div>
+    <div class="hero-panel">
+      <div class="hero-panel-card">
+        <h3>How it works</h3>
+        <ol class="steps">
+          <li><strong>Register</strong> your agency or production house.</li>
+          <li><strong>List your show</strong> with channel, date and time slots.</li>
+          <li><strong>Administrator approval</strong> reviews schedule conflicts.</li>
+          <li><strong>Published</strong> shows appear on the public schedule.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <h2>Everything you need to run a broadcast schedule</h2>
+      <p>Simple tools for agencies, powerful oversight for administrators.</p>
+    </div>
+    <div class="feature-grid">
+      <article class="card feature-card">
+        <h3>Show Listings</h3>
+        <p>Submit complete show details - title, category, host, channel, language and audience - from one clean form.</p>
+      </article>
+      <article class="card feature-card">
+        <h3>Schedule Validation</h3>
+        <p>Start and end times are validated on the server, and overlapping broadcasts on the same channel are flagged.</p>
+      </article>
+      <article class="card feature-card">
+        <h3>Approval Workflow</h3>
+        <p>Every submission starts as Pending. Administrators approve or reject with a written reason, stored in status history.</p>
+      </article>
+      <article class="card feature-card">
+        <h3>Public Schedule</h3>
+        <p>Approved shows are searchable and filterable by category, channel and broadcast date for every visitor.</p>
+      </article>
+      <article class="card feature-card">
+        <h3>User Dashboard</h3>
+        <p>Track total, approved, pending and rejected submissions with live statistics from PostgreSQL.</p>
+      </article>
+      <article class="card feature-card">
+        <h3>Secure Admin Portal</h3>
+        <p>Role-based access protects the admin area. Passwords are hashed and every query is parameterized.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-head">
+      <h2>Upcoming Approved Shows</h2>
+      <p>Live from the database - only administrator-approved broadcasts appear here.</p>
+    </div>
+
+    {% if shows %}
+      <div class="show-grid">
+        {% for show in shows %}
+          <article class="card show-card">
+            {% if show.poster_url %}
+              <img class="show-poster" src="{{ show.poster_url }}" alt="{{ show.title }}"
+                   onerror="this.style.display='none'">
+            {% endif %}
+            <div class="show-card-body">
+              <div class="show-card-top">
+                <span class="badge badge-soft">{{ show.category }}</span>
+                <span class="badge badge-approved">Approved</span>
+              </div>
+              <h3>{{ show.title }}</h3>
+              <p class="muted">{{ show.description[:110] }}{% if show.description|length > 110 %}...{% endif %}</p>
+              <ul class="meta-list">
+                <li><span>Channel</span><strong>{{ show.channel_name }}</strong></li>
+                <li><span>Agency</span><strong>{{ show.agency_name }}</strong></li>
+                <li><span>Host</span><strong>{{ show.host_name }}</strong></li>
+                <li><span>Broadcast</span><strong>{{ show.broadcast_date|fmt_date }}, {{ show.start_time|fmt_time }} - {{ show.end_time|fmt_time }}</strong></li>
+              </ul>
+              <a class="btn btn-outline btn-sm" href="{{ url_for('show_details', show_id=show.show_id) }}">View Details</a>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state card">
+        <h3>No approved shows published yet</h3>
+        <p>Approved submissions will appear on this page as soon as an administrator publishes them.</p>
+      </div>
+    {% endif %}
+
+    <div class="center mt-2">
+      <a href="{{ url_for('public_shows') }}" class="btn btn-primary">Browse the Full Schedule</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

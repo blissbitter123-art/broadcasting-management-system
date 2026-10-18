@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="page-head">
+      <div>
+        <h1>Welcome back, {{ g.user.full_name }}</h1>
+        <p class="muted">Agency: {{ g.user.agency_name }} &middot; {{ g.user.email }}</p>
+      </div>
+      <div class="page-actions">
+        <a href="{{ url_for('add_show') }}" class="btn btn-primary">+ List a New Show</a>
+        <a href="{{ url_for('my_shows') }}" class="btn btn-outline">Manage My Shows</a>
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="card stat-card">
+        <span class="stat-label">Total Shows</span>
+        <strong class="stat-value">{{ stats.total }}</strong>
+        <span class="stat-note">Submitted by you</span>
+      </div>
+      <div class="card stat-card stat-success">
+        <span class="stat-label">Approved</span>
+        <strong class="stat-value">{{ stats.approved }}</strong>
+        <span class="stat-note">Published publicly</span>
+      </div>
+      <div class="card stat-card stat-warning">
+        <span class="stat-label">Pending</span>
+        <strong class="stat-value">{{ stats.pending }}</strong>
+        <span class="stat-note">Awaiting review</span>
+      </div>
+      <div class="card stat-card stat-danger">
+        <span class="stat-label">Rejected</span>
+        <strong class="stat-value">{{ stats.rejected }}</strong>
+        <span class="stat-note">Needs changes</span>
+      </div>
+    </div>
+
+    <div class="two-col mt-2">
+      <div class="card">
+        <div class="card-head">
+          <h2>Upcoming Approved Broadcasts</h2>
+        </div>
+        {% if upcoming %}
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>Show</th><th>Channel</th><th>Date</th><th>Time</th></tr>
+              </thead>
+              <tbody>
+                {% for show in upcoming %}
+                  <tr>
+                    <td><a href="{{ url_for('show_details', show_id=show.show_id) }}">{{ show.title }}</a></td>
+                    <td>{{ show.channel_name }}</td>
+                    <td>{{ show.broadcast_date|fmt_date }}</td>
+                    <td>{{ show.start_time|fmt_time }} - {{ show.end_time|fmt_time }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="muted empty-inline">No approved shows scheduled yet.</p>
+        {% endif %}
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h2>Recent Submissions</h2>
+          <a href="{{ url_for('my_shows') }}" class="btn btn-outline btn-sm">View all</a>
+        </div>
+        {% if recent %}
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>Show</th><th>Date</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                {% for show in recent %}
+                  <tr>
+                    <td><a href="{{ url_for('show_details', show_id=show.show_id) }}">{{ show.title }}</a></td>
+                    <td>{{ show.broadcast_date|fmt_date }}</td>
+                    <td><span class="badge badge-{{ show.status|lower }}">{{ show.status }}</span></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="muted empty-inline">You have not listed any shows yet. Start with "List a New Show".</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

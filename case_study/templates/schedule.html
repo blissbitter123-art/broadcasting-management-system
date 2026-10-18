@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Schedule - CBMS{% endblock %}
+
+{% block content %}
+<h1>Broadcasting Schedule</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Show Title</th>
+            <th>Channel</th>
+            <th>Agency</th>
+            <th>Genre</th>
+            <th>Date</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in schedules %}
+        <tr>
+            <td>{{ s.show_title }}</td>
+            <td>{{ s.channel_name }}</td>
+            <td>{{ s.agency_name }}</td>
+            <td>{{ s.genre_name }}</td>
+            <td>{{ s.broadcast_date }}</td>
+            <td>{{ s.start_time }}</td>
+            <td>{{ s.end_time }}</td>
+            <td><span class="status status-{{ s.status|lower }}">{{ s.status }}</span></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

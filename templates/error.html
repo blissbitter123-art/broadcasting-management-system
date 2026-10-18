@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Service Problem{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="empty-state card error-card">
+      <h1>Something went wrong</h1>
+      <p class="muted">{{ message }}</p>
+      <p class="muted small">Check that PostgreSQL is running and that the .env file has the correct database credentials.</p>
+      <div class="hero-actions">
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Go to Homepage</a>
+        <a href="javascript:location.reload()" class="btn btn-outline">Try Again</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

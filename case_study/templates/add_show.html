@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Add Show - CBMS{% endblock %}
+
+{% block content %}
+<h1>Submit a New Show</h1>
+
+<form method="POST" class="form">
+    <div class="form-group">
+        <label for="title">Show Title:</label>
+        <input type="text" id="title" name="title" required maxlength="200">
+    </div>
+    <div class="form-group">
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" rows="4" required></textarea>
+    </div>
+    <div class="form-group">
+        <label for="agency_id">Agency:</label>
+        <select id="agency_id" name="agency_id" required>
+            <option value="">-- Select Agency --</option>
+            {% for agency in agencies %}
+            <option value="{{ agency.agency_id }}">{{ agency.agency_name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="genre_id">Genre:</label>
+        <select id="genre_id" name="genre_id" required>
+            <option value="">-- Select Genre --</option>
+            {% for genre in genres %}
+            <option value="{{ genre.genre_id }}">{{ genre.genre_name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="duration_minutes">Duration (minutes):</label>
+        <input type="number" id="duration_minutes" name="duration_minutes" min="1" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit Show</button>
+</form>
+{% endblock %}
